@@ -3,7 +3,9 @@ const admin = require("firebase-admin");
 // var serviceAccount = require("./serviceAccountKey.json");
 const path = require("path");
 require("dotenv").config();
-const serviceAccount = require(path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS));
+const serviceAccountBuffer = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64");
+const serviceAccount = JSON.parse(serviceAccountBuffer.toString());
+
 
 if (!admin.apps.length) {
   admin.initializeApp({
