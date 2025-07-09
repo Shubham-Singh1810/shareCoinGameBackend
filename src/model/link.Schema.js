@@ -29,6 +29,12 @@ const linkSchema = mongoose.Schema({
   referalCode: {
     type: String,
   },
+  userId:[
+   {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+   }
+  ]
 });
 linkSchema.plugin(timestamps);
 module.exports = mongoose.model("Link", linkSchema);

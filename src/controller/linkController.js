@@ -11,24 +11,6 @@ const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
 
 
-// linkController.post("/create", async (req, res) => {
-//     try {
-//       const linkCreated = await Link.create(req.body);
-//       sendResponse(res, 200, "Success", {
-//         message: "Link created successfully!",
-//         data: linkCreated,
-//         statusCode: 200,
-//       });
-//     } catch (error) {
-//       console.error(error);
-//       sendResponse(res, 500, "Failed", {
-//         message: error.message || "Internal server error",
-//         statusCode: 500,
-//       });
-//     }
-// });
-
-
 linkController.post("/create", async (req, res) => {
   try {
     const linkCreated = await Link.create(req.body);
@@ -68,23 +50,35 @@ linkController.post("/list", async (req, res) => {
     const {
       pageNo = 1,
       pageCount = 100,
-      gameId, // gameId is optional
+      gameId,
+      userId
     } = req.body;
 
-    // Add gameId filter only if it is present
+    // Build query object
     const query = {};
     if (gameId) {
       query.gameId = gameId;
     }
 
+    // Fetch links with pagination
     const linkList = await Link.find(query)
       .sort({ createdAt: -1 })
       .limit(parseInt(pageCount))
       .skip((parseInt(pageNo) - 1) * parseInt(pageCount));
 
+    // Map and add `alreadyUser` flag
+    const linkListWithFlag = linkList.map(link => {
+      const alreadyUser = userId ? link.userId.includes(userId) : false;
+      return {
+        ...link.toObject(),  // convert mongoose doc to plain object
+        alreadyUser
+      };
+    });
+
+    // Send response
     sendResponse(res, 200, "Success", {
       message: "Link list retrieved successfully!",
-      data: linkList,
+      data: linkListWithFlag,
       statusCode: 200,
     });
   } catch (error) {
@@ -95,6 +89,7 @@ linkController.post("/list", async (req, res) => {
     });
   }
 });
+
 
 linkController.put("/update", async (req, res) => {
   try {
@@ -151,7 +146,7 @@ linkController.delete("/delete/:id", async (req, res) => {
 
 linkController.post("/trackView", async (req, res) => {
   try {
-    const { linkId, deviceType, androidDeviceId, gameId } = req.body;
+    const { linkId, deviceType, androidDeviceId, gameId, userId } = req.body;
 
     if (!linkId || !deviceType || !androidDeviceId || !gameId) {
       return sendResponse(res, 400, "Failed", {
@@ -179,7 +174,11 @@ linkController.post("/trackView", async (req, res) => {
         statusCode: 400,
       });
     }
-
+    if (userId) {
+      if (!link.userId.includes(userId)) {
+        link.userId.push(userId);
+      }
+    }
     await link.save();
 
     sendResponse(res, 200, "Success", {
@@ -195,6 +194,5 @@ linkController.post("/trackView", async (req, res) => {
     });
   }
 });
-
 
 module.exports = linkController;
