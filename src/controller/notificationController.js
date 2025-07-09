@@ -55,8 +55,6 @@ notificationController.post("/create", async (req, res) => {
 notificationController.post("/list", async (req, res) => {
   try {
     const {
-      pageNo = 1,
-      pageCount = 10,
       gameIds = []
     } = req.body;
 
@@ -67,8 +65,8 @@ notificationController.post("/list", async (req, res) => {
     }
 
     const notificationList = await Notification.find(query)
-      .limit(parseInt(pageCount))
-      .skip((parseInt(pageNo) - 1) * parseInt(pageCount));
+      .sort({ createdAt: -1 }) 
+     
 
     const totalCount = await Notification.countDocuments(query);
 
