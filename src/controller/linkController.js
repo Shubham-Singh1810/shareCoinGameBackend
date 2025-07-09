@@ -145,11 +145,11 @@ linkController.delete("/delete/:id", async (req, res) => {
 
 linkController.post("/trackView", async (req, res) => {
   try {
-    const { linkId, deviceType, androidDeviceId, gameId, userId } = req.body;
+    const { linkId, deviceType, deviceId, gameId, userId } = req.body;
 
-    if (!linkId || !deviceType || !androidDeviceId || !gameId) {
+    if (!linkId || !deviceType || !deviceId || !gameId) {
       return sendResponse(res, 400, "Failed", {
-        message: "linkId, deviceType, androidDeviceId, and gameId are required",
+        message: "linkId, deviceType, deviceId, and gameId are required",
         statusCode: 400,
       });
     }
