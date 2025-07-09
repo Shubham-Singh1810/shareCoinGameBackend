@@ -15,15 +15,14 @@ linkController.post("/create", async (req, res) => {
   try {
     const linkCreated = await Link.create(req.body);
     
-    const { title, subTitle, gameId } = req.body;
+    const { title,  gameId } = req.body;
 
-    if (title && subTitle && gameId) {
+    if (title && gameId) {
       const users = await User.find({ gameId }).populate("gameId");
-
       await Promise.all(users.map(async (user) => {
         await sendNotification({
-          title,
-          subTitle,
+          title :"A new link is created",
+          subTitle : `The link is ${req?.body?.link || req?.body?.referalCode}`,
           icon: user.gameId?.image || "",
           fcmToken: user.deviceId,
           gameId: gameId

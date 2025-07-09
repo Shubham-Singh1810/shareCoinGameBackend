@@ -33,7 +33,6 @@ notificationController.post("/create", async (req, res) => {
         icon: user.gameId?.image || ""  ,
         fcmToken: user.deviceId  ,
         gameId:user.gameId._id
-
       });
     }));
 

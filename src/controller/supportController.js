@@ -103,5 +103,30 @@ supportController.delete("/delete/:id", async (req, res) => {
     });
   }
 });
+supportController.get("/details/:gameId", async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const support = await Support.findOne({gameId});
+    if (!support) {
+      return sendResponse(res, 404, "Failed", {
+        message: "Support not found",
+        statusCode: 404,
+      });
+    }
+    sendResponse(res, 200, "Success", {
+      data:support,
+      message: "Support data retrived successfully!",
+      statusCode:200
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
+      statusCode: 500,   
+    });
+  }
+});
+
+
 
 module.exports = supportController;

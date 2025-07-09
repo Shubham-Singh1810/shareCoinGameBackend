@@ -9,6 +9,9 @@ const supportSchema = mongoose.Schema({
   TermsAndCondition: {
     type: String,
   },
+  gameId:{
+    type:String
+  }
 });
 supportSchema.plugin(timestamps);
 module.exports = mongoose.model("Support", supportSchema);
