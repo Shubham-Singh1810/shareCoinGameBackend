@@ -9,15 +9,12 @@ const blogSchema = mongoose.Schema({
   },
   seoTitle: {
     type: String,
-    required: true,
   },
   metaKeyword: {
     type: String,
-    required: true,
   },
   metaDescription: {
     type: String,
-    required: true,
   },
   tags: {
     type: String,
@@ -39,7 +36,8 @@ const blogSchema = mongoose.Schema({
     default: true,
   },
   gameId:{
-    type:String
+    type:String,
+    required: true,
   }
 });
 
