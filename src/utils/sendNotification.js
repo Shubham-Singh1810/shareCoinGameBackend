@@ -1,4 +1,4 @@
-const Notification = require("../model/notification.Schema");
+
 const admin = require("firebase-admin");
 // var serviceAccount = require("./serviceAccountKey.json");
 const path = require("path");
@@ -16,7 +16,7 @@ if (!admin.apps.length) {
 exports.sendNotification = async (data) => {
 
   try {
-      let notificationCreated = await Notification.create(data);
+      console.log("sdf", data?.fcmToken)
     
     // Check if FCM token is present
     if (!data?.fcmToken) {
@@ -36,10 +36,7 @@ exports.sendNotification = async (data) => {
     const response = await admin.messaging().send(message);
     console.log("Notification sent successfully:", response);
 
-    return {
-      notification: notificationCreated,
-    //   fcmResponse: response,
-    };
+    
   } catch (error) {
     
     // If token invalid or unregistered — handle & remove token from DB if you store it

@@ -5,29 +5,29 @@ const linkController = express.Router();
 const Link = require("../model/link.Schema");
 const Game = require("../model/game.Schema");
 const User = require("../model/user.Schema");
-const { sendNotification } = require("../utils/sendNotification"); 
+const { sendNotification } = require("../utils/sendNotification");
 require("dotenv").config();
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
-
+const Notification = require("../model/notification.Schema");
 
 linkController.post("/create", async (req, res) => {
   try {
     const linkCreated = await Link.create(req.body);
-    
-    const { title,  gameId } = req.body;
-
+    const { title, gameId } = req.body;
     if (title && gameId) {
       const users = await User.find({ gameId }).populate("gameId");
-      await Promise.all(users.map(async (user) => {
-        await sendNotification({
-          title : title,
-          subTitle : `New Reward Link Added Collect Fast 💯💯`,
-          icon: user.gameId?.image || "",
-          fcmToken: user.deviceId,
-          gameId: gameId
-        });
-      }));
+      await Promise.all(
+        users.map(async (user) => {
+          await sendNotification({
+            title: title,
+            subTitle: `New Reward Link Added Collect Fast 💯💯`,
+            icon: user.gameId?.image || "",
+            fcmToken: user.deviceId,
+            gameId: gameId,
+          });
+        })
+      );
     }
 
     sendResponse(res, 200, "Success", {
@@ -46,12 +46,7 @@ linkController.post("/create", async (req, res) => {
 
 linkController.post("/list", async (req, res) => {
   try {
-    const {
-      pageNo = 1,
-      pageCount = 100,
-      gameId,
-      userId
-    } = req.body;
+    const { pageNo = 1, pageCount = 100, gameId, userId } = req.body;
 
     // Build query object
     const query = {};
@@ -66,11 +61,11 @@ linkController.post("/list", async (req, res) => {
       .skip((parseInt(pageNo) - 1) * parseInt(pageCount));
 
     // Map and add `alreadyUser` flag
-    const linkListWithFlag = linkList.map(link => {
+    const linkListWithFlag = linkList.map((link) => {
       const alreadyUser = userId ? link.userId.includes(userId) : false;
       return {
-        ...link.toObject(),  // convert mongoose doc to plain object
-        alreadyUser
+        ...link.toObject(), // convert mongoose doc to plain object
+        alreadyUser,
       };
     });
 
@@ -89,7 +84,6 @@ linkController.post("/list", async (req, res) => {
   }
 });
 
-
 linkController.put("/update", async (req, res) => {
   try {
     const id = req.body._id;
@@ -100,13 +94,9 @@ linkController.put("/update", async (req, res) => {
         statusCode: 403,
       });
     }
-    const updatedLink = await Link.findByIdAndUpdate(
-      id,
-      req.body,
-      {
-        new: true, // Return the updated document
-      }
-    );
+    const updatedLink = await Link.findByIdAndUpdate(id, req.body, {
+      new: true, // Return the updated document
+    });
     sendResponse(res, 200, "Success", {
       data: updatedLink,
       statusCode: 200,
@@ -132,13 +122,13 @@ linkController.delete("/delete/:id", async (req, res) => {
     await Link.findByIdAndDelete(id);
     sendResponse(res, 200, "Success", {
       message: "Link deleted successfully!",
-      statusCode:200
+      statusCode: 200,
     });
   } catch (error) {
     console.error(error);
     sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error",
-      statusCode: 500,   
+      statusCode: 500,
     });
   }
 });
