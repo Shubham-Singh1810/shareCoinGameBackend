@@ -121,5 +121,23 @@ notificationController.post("/list", async (req, res) => {
     });
   }
 });
+notificationController.get("/delete-all-notification", async (req, res) => {
+  try {
+    // Sabhi notifications delete karo
+    await Notification.deleteMany({});
+
+    sendResponse(res, 200, "Success", {
+      message: "All notifications deleted successfully!",
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error("Error deleting notifications:", error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
+      statusCode: 500,
+    });
+  }
+});
+
 
 module.exports = notificationController;

@@ -16,8 +16,6 @@ if (!admin.apps.length) {
 exports.sendNotification = async (data) => {
 
   try {
-      console.log("sdf", data?.fcmToken)
-    
     // Check if FCM token is present
     if (!data?.fcmToken) {
       console.warn("FCM token missing — notification not sent.");

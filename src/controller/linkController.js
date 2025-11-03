@@ -19,6 +19,12 @@ linkController.post("/create", async (req, res) => {
       const users = await User.find({ gameId }).populate("gameId");
       await Promise.all(
         users.map(async (user) => {
+          await Notification.create({
+            title: title,
+            subTitle: `New Reward Link Added Collect Fast 💯💯`,
+            icon: user.gameId?.image || "",
+            gameId: gameId,
+          });
           await sendNotification({
             title: title,
             subTitle: `New Reward Link Added Collect Fast 💯💯`,
