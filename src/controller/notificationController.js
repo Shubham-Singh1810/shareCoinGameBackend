@@ -46,8 +46,8 @@ notificationController.post("/create", async (req, res) => {
     );
 
     // Step 3: Fetch users related to the selected gameIds
-    const users = await User.find({ gameId: { $in: gameIds } }).populate("gameId");
-
+    // const users = await User.find({ gameId: { $in: gameIds } }).populate("gameId");
+    const users = await User.find({ gameId: { $in: [gameId] } }).populate("gameId");
     // Step 4: Remove duplicate deviceIds (fcmTokens)
     const uniqueTokensMap = new Map();
     users.forEach((user) => {

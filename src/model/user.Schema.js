@@ -9,10 +9,10 @@ const userSchema = mongoose.Schema({
   deviceType: {
     type: String,
   },
-  gameId: {
+  gameId: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Game",
-  },
+  }],
 });
 
 userSchema.plugin(timestamps);

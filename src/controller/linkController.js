@@ -15,21 +15,21 @@ linkController.post("/create", async (req, res) => {
   try {
     const linkCreated = await Link.create(req.body);
     const { title, gameId } = req.body;
+    const gameDetails = await Game.findOne({_id:gameId})
     if (title && gameId) {
-      const users = await User.find({ gameId }).populate("gameId");
+      const users = await User.find({ gameId: { $in: [gameId] } }).populate("gameId");
       await Notification.create({
-            title: title,
-            subTitle: `New Reward Link Added Collect Fast 💯💯`,
-            icon: users[0].gameId?.image || "",
-            gameId: gameId,
-          });
+        title: title,
+        subTitle: `New Reward Link Added Collect Fast 💯💯`,
+        icon: gameDetails.image || "",
+        gameId: gameId,
+      });
       await Promise.all(
         users.map(async (user) => {
-          
           await sendNotification({
             title: title,
             subTitle: `New Reward Link Added Collect Fast 💯💯`,
-            icon: user.gameId?.image || "",
+            icon: gameDetails?.image || "",
             fcmToken: user.deviceId,
             gameId: gameId,
           });

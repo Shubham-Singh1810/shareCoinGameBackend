@@ -18,31 +18,57 @@ userController.post("/create", async (req, res) => {
         statusCode: 400,
       });
     }
-    
-    const existingUser = await User.findOne({ deviceId, gameId, deviceType });
 
+    // Find user by device info
+    const existingUser = await User.findOne({ deviceId, deviceType });
+
+    // If user already exists
     if (existingUser) {
-      return sendResponse(res, 409, "Failed", {
-        message: "User with this device info already exists.",
-        statusCode: 409,
+      
+      // Check if game already exists in the array
+      const alreadyAdded = existingUser.gameId.includes(gameId);
+
+      if (alreadyAdded) {
+        return sendResponse(res, 200, "Success", {
+          message: "Game already added to this user.",
+          data: existingUser,
+          statusCode: 200,
+        });
+      }
+
+      // Push new gameId into array
+      existingUser.gameId.push(gameId);
+      await existingUser.save();
+
+      return sendResponse(res, 200, "Success", {
+        message: "Game added to user successfully.",
+        data: existingUser,
+        statusCode: 200,
       });
     }
 
-    const userCreated = await User.create(req.body);
+    // If no user found → create new user
+    const userCreated = await User.create({
+      deviceId,
+      deviceType,
+      gameId: [gameId],
+    });
 
-    sendResponse(res, 200, "Success", {
+    return sendResponse(res, 200, "Success", {
       message: "User created successfully!",
       data: userCreated,
       statusCode: 200,
     });
+
   } catch (error) {
     console.error(error);
-    sendResponse(res, 500, "Failed", {
+    return sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error",
       statusCode: 500,
     });
   }
 });
+
 
 
 
