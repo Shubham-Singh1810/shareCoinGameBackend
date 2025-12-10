@@ -13,7 +13,6 @@ const { sendNotification } = require("../utils/sendNotification");
 notificationController.post("/create", async (req, res) => {
   try {
     const { title, subTitle, gameIds } = req.body;
-
     if (
       !title ||
       !subTitle ||
@@ -47,7 +46,8 @@ notificationController.post("/create", async (req, res) => {
 
     // Step 3: Fetch users related to the selected gameIds
     // const users = await User.find({ gameId: { $in: gameIds } }).populate("gameId");
-    const users = await User.find({ gameId: { $in: [gameId] } }).populate("gameId");
+    // Step 3: Fetch users related to the selected gameIds
+    const users = await User.find({ gameId: { $in: gameIds } }).populate("gameId");
     // Step 4: Remove duplicate deviceIds (fcmTokens)
     const uniqueTokensMap = new Map();
     users.forEach((user) => {
@@ -87,8 +87,6 @@ notificationController.post("/create", async (req, res) => {
     });
   }
 });
-
-
 notificationController.post("/list", async (req, res) => {
   try {
     const { gameIds = [] } = req.body;
@@ -138,6 +136,4 @@ notificationController.get("/delete-all-notification", async (req, res) => {
     });
   }
 });
-
-
 module.exports = notificationController;
