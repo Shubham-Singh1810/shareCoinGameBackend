@@ -21,7 +21,7 @@ linkController.post("/create", async (req, res) => {
       await Notification.create({
         title: title,
         subTitle: `New Reward Link Added Collect Fast 💯💯`,
-        icon: gameDetails.image || "",
+        icon: gameDetails.actualImage || "",
         gameId: gameId,
       });
       await Promise.all(
@@ -29,7 +29,7 @@ linkController.post("/create", async (req, res) => {
           await sendNotification({
             title: title,
             subTitle: `New Reward Link Added Collect Fast 💯💯`,
-            icon: gameDetails?.image || "",
+            icon: gameDetails?.actualImage || "",
             fcmToken: user.deviceId,
             gameId: gameId,
           });

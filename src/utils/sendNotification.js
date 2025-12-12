@@ -14,11 +14,10 @@ if (!admin.apps.length) {
 }
 
 exports.sendNotification = async (data) => {
-
   try {
     // Check if FCM token is present
     if (!data?.fcmToken) {
-      console.warn("FCM token missing — notification not sent.");
+      // console.warn("FCM token missing — notification not sent.");
       return notificationCreated;
     }
     // Prepare FCM message

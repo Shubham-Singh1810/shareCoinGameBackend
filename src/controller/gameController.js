@@ -7,25 +7,40 @@ require("dotenv").config();
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
 
-gameController.post("/create", upload.single("image"), async (req, res) => {
+const uploadFields = upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "actualImage", maxCount: 1 }
+]);
+
+gameController.post("/create", uploadFields, async (req, res) => {
   try {
-    let obj;
-    if (req.file) {
-      let image = await cloudinary.uploader.upload(req.file.path, function (err, result) {
-        if (err) {
-          return err;
-        } else {
-          return result;
-        }
-      });
-      obj = { ...req.body, image: image.url };
+    let obj = { ...req.body };
+
+    // ---- IMAGE 1 (image) ----
+    if (req.files?.image?.[0]) {
+      const uploadedImg = await cloudinary.uploader.upload(
+        req.files.image[0].path
+      );
+      obj.image = uploadedImg.url;
     }
+
+    // ---- IMAGE 2 (actualImage) ----
+    if (req.files?.actualImage?.[0]) {
+      const uploadedActualImg = await cloudinary.uploader.upload(
+        req.files.actualImage[0].path
+      );
+      obj.actualImage = uploadedActualImg.url;
+    }
+
+    // Create DB entry
     const gameCreated = await Game.create(obj);
+
     sendResponse(res, 200, "Success", {
       message: "Game created successfully!",
       data: gameCreated,
       statusCode: 200
     });
+
   } catch (error) {
     console.error(error);
     sendResponse(res, 500, "Failed", {
@@ -34,6 +49,7 @@ gameController.post("/create", upload.single("image"), async (req, res) => {
     });
   }
 });
+
 
 gameController.post("/list", async (req, res) => {
     try {
@@ -63,42 +79,63 @@ gameController.post("/list", async (req, res) => {
         statusCode: 500
       });
     }
-  });
+});
   
-gameController.put("/update", upload.single("image"), async (req, res) => {
+gameController.put("/update", uploadFields, async (req, res) => {
   try {
     const id = req.body._id;
     const game = await Game.findById(id);
+
     if (!game) {
       return sendResponse(res, 404, "Failed", {
         message: "Game not found",
         statusCode: 403
       });
     }
+
     let updatedData = { ...req.body };
-    if (req.file) {
-      // Delete the old image from Cloudinary
+
+    // ---------- IMAGE 1 (image) ----------
+    if (req.files?.image?.[0]) {
+      // delete old image
       if (game.image) {
         const publicId = game.image.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(publicId, (error, result) => {
-          if (error) {
-            console.error("Error deleting old image from Cloudinary:", error);
-          } else {
-            console.log("Old image deleted from Cloudinary:", result);
-          }
-        });
+        await cloudinary.uploader.destroy(publicId);
       }
-      const image = await cloudinary.uploader.upload(req.file.path);
-      updatedData.image = image.url;
+
+      // upload new image
+      const uploadedImg = await cloudinary.uploader.upload(
+        req.files.image[0].path
+      );
+      updatedData.image = uploadedImg.url;
     }
+
+    // ---------- IMAGE 2 (actualImage) ----------
+    if (req.files?.actualImage?.[0]) {
+      // delete old actualImage
+      if (game.actualImage) {
+        const publicId2 = game.actualImage.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId2);
+      }
+
+      // upload new actual img
+      const uploadedActualImg = await cloudinary.uploader.upload(
+        req.files.actualImage[0].path
+      );
+      updatedData.actualImage = uploadedActualImg.url;
+    }
+
+    // Update database
     const updatedGame = await Game.findByIdAndUpdate(id, updatedData, {
-      new: true, // Return the updated document
+      new: true,
     });
+
     sendResponse(res, 200, "Success", {
       message: "Game updated successfully!",
       data: updatedGame,
       statusCode: 200
     });
+
   } catch (error) {
     sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error",
@@ -106,6 +143,7 @@ gameController.put("/update", upload.single("image"), async (req, res) => {
     });
   }
 });
+
 
 gameController.delete("/delete/:id", async (req, res) => {
   try {

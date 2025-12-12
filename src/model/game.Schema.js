@@ -15,6 +15,10 @@ const gameSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  actualImage:{
+    type: String,
+    required: true,
+  }
 });
 gameSchema.plugin(timestamps);
 module.exports = mongoose.model("Game", gameSchema);

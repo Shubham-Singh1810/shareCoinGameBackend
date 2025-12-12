@@ -29,7 +29,7 @@ notificationController.post("/create", async (req, res) => {
     const games = await Game.find({ _id: { $in: gameIds } });
     const gameIconMap = {};
     games.forEach((game) => {
-      gameIconMap[game._id.toString()] = game.image || "";
+      gameIconMap[game._id.toString()] = game.actualImage || "";
     });
 
     // Step 2: Create one notification per gameId
@@ -52,9 +52,8 @@ notificationController.post("/create", async (req, res) => {
     const uniqueTokensMap = new Map();
     users.forEach((user) => {
       const token = user.deviceId;
-      const gameId = user.gameId?._id?.toString();
-      const icon = user.gameId?.image || "";
-
+      const gameId = user.gameId?.[0]._id?.toString();
+      const icon = user?.gameId[0].actualImage || "";
       if (token && !uniqueTokensMap.has(token)) {
         uniqueTokensMap.set(token, { token, gameId, icon });
       }
